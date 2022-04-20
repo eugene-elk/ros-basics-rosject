@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="wallwalking" type="show_distance.py" name="wall_walking_node" output="screen" />
+</launch>
