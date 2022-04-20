@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="wallwalking" type="find_wall_service_server.py" name="find_wall_node" output="screen" />
+    <node pkg="wallwalking" type="program2.py" name="wall_walking_node" output="screen" />
+</launch>

@@ -1,3 +1,0 @@
-<launch>
-    <node pkg="wallwalking" type="program_stop.py" name="wall_walking_node" output="screen" />
-</launch>

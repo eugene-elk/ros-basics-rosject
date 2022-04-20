@@ -5,8 +5,9 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from wallwalking.srv import FindWall, FindWallResponse
 
-
 move = Twist()
+value_front = 1
+minimum_position = 0
 
 
 def callback_scan(msg):
@@ -23,14 +24,13 @@ def callback_scan(msg):
     global value_front
     value_front = msg.ranges[360]
     print("[scan] Value in front: ", value_front)
-    print("[scan] ")    
 
 
 def callback_srv(request):
 
     print("[srv] Call Service Server")
 
-    while abs(minimum_position - 360) > 4:
+    while abs(minimum_position - 360) > 3:
         move.linear.x = 0
         move.angular.z = 0.1
         pub.publish(move)
