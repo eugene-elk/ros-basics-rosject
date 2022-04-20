@@ -6,7 +6,12 @@ from geometry_msgs.msg import Twist
 from wallwalking.srv import FindWall, FindWallResponse
 
 
+move = Twist()
+
+
 def callback_scan(msg):
+
+    global minimum_position
     minimum_position = 0
     minimum_value = msg.ranges[0]
 
@@ -15,23 +20,36 @@ def callback_scan(msg):
             minimum_value = msg.ranges[i]
             minimum_position = i
 
-    global wall_in_front
-
-    if minimum_position > 357 and minimum_position < 363:
-        wall_in_front = True
-    else:
-        wall_in_front = False
-
-    print("Wall in front: ", wall_in_front)
+    global value_front
+    value_front = msg.ranges[360]
+    print("[scan] Value in front: ", value_front)
+    print("[scan] ")    
 
 
 def callback_srv(request):
 
-    global wall_in_front
-    while not wall_in_front:
+    print("[srv] Call Service Server")
+
+    while abs(minimum_position - 360) > 4:
         move.linear.x = 0
         move.angular.z = 0.1
         pub.publish(move)
+
+    print("[srv] Wall is in front of the robot")
+
+    while value_front > 0.3:
+        move.linear.x = 0.1
+        move.angular.z = 0
+        pub.publish(move)
+
+    print("[srv] Wall is closer than 30cm")
+
+    while abs(minimum_position - 180) > 3:
+        move.linear.x = 0
+        move.angular.z = 0.1
+        pub.publish(move)
+
+    print("[srv] Wall is on the right side")
 
     move.linear.x = 0
     move.angular.z = 0
@@ -39,14 +57,11 @@ def callback_srv(request):
 
     result = FindWallResponse()
     result.wallfound = True
-
+    print("[srv] Service Server Finished")
     return result
 
 
 rospy.init_node('find_wall_node')
-rate = rospy.Rate(10)
-move = Twist()
-wall_in_front = False
 
 sub = rospy.Subscriber('/scan', LaserScan, callback_scan)
 srv = rospy.Service('/find_wall', FindWall, callback_srv)
