@@ -18,7 +18,7 @@ def callback(msg):
         move.angular.z = -0.13
     elif right > 0.3:
         move.angular.z = 0
-    else: 
+    else:
         move.angular.z = 0.13
 
     if front < 0.5:
