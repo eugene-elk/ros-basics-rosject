@@ -13,12 +13,12 @@ class RecordOdomAction():
 
     _feedback = OdomRecordFeedback()
     _result = OdomRecordResult()
-    one_lap_dist = (1.8 * 2) + (0.8 * 2)
+    one_lap_dist = 4.0
 
     def __init__(self):
         self.subOdom = rospy.Subscriber('/odom', Odometry, self.odom_callback)
         while self.subOdom.get_num_connections() < 1:
-            rospy.loginfo("Waiting for subsccription to /odom")
+            rospy.loginfo("[odom_as] Waiting for subsccription to /odom")
             time.sleep(0.1)
 
         self._as = actionlib.SimpleActionServer(
@@ -30,8 +30,7 @@ class RecordOdomAction():
         self.odom_x = round(msg.pose.pose.position.x, 2)
         self.odom_y = round(msg.pose.pose.position.y, 2)
         self.odom_theta = round(msg.pose.pose.orientation.z, 2)
-        rospy.loginfo("Odom_x: " + str(self.odom_x) + " Odom_y: " +
-                      str(self.odom_y) + " Odom_theta: " + str(self.odom_theta))
+        # rospy.loginfo("[odom_as] Odom_x: " + str(self.odom_x) + " Odom_y: " + str(self.odom_y) + " Odom_theta: " + str(self.odom_theta))
 
     def goal_callback(self, goal):
 
@@ -49,7 +48,7 @@ class RecordOdomAction():
         while distance_travelled < self.one_lap_dist:
 
             if self._as.is_preempt_requested():
-                rospy.loginfo('The goal has been cancelled')
+                rospy.loginfo('[odom_as] The goal has been cancelled')
                 self._as.set_preempted()
                 success = False
                 break
@@ -64,7 +63,8 @@ class RecordOdomAction():
 
             iteration += 1
             distance_travelled += last_step
-            rospy.loginfo('Travelled distance: ' + str(distance_travelled))
+            rospy.loginfo('[odom_as] Travelled distance: ' +
+                          str(distance_travelled))
 
             self._feedback.current_total = distance_travelled
             self._as.publish_feedback(self._feedback)

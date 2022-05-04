@@ -23,8 +23,8 @@ def callback_scan(msg):
 
     global value_front
     value_front = msg.ranges[360]
-    # print("[scan] Value in front: ", value_front)
-    print("[scan] Minimal position: ", minimum_position)
+
+    print("[srv_scan] Minimal position: ", minimum_position)
 
 
 def callback_srv(request):
@@ -51,7 +51,7 @@ def callback_srv(request):
 
     while abs(minimum_position - 180) > 15:
         move.linear.x = 0
-        move.angular.z = 0.1
+        move.angular.z = 0.25
         pub.publish(move)
         rospy.sleep(0.5)
 
