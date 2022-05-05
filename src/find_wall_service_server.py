@@ -16,10 +16,14 @@ class FindWallService():
     def __init__(self):
         self.subScan = rospy.Subscriber('/scan', LaserScan, self.callback_scan)
         while self.subScan.get_num_connections() < 1:
-            rospy.loginfo("[odom_as] Waiting for subsccription to /scan")
+            rospy.loginfo("Waiting for subsccription to /scan")
             time.sleep(0.1)
 
         self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
+        while self.pub.get_num_connections() < 1:
+            rospy.loginfo("Waiting for connection to /cmd_vel")
+            time.sleep(0.1)
+
         self.srv = rospy.Service('/find_wall', FindWall, self.callback_srv)
         self.rate = rospy.Rate(10)
 
