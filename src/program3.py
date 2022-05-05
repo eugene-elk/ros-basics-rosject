@@ -16,20 +16,50 @@ DONE = 2
 WARN = 3
 ERROR = 4
 
-right = float()
-front = float()
+lidar_right = float()
+lidar_front = float()
+
+front_distance_reaction = 0.55
+perfect_wall_distance = 0.32
+
+
+def rele_controller():
+    move.linear.x = 0.05
+    move.angular.z = 0
+    if lidar_right > 0.4:
+        move.angular.z = -0.09
+    elif lidar_right > 0.3:
+        move.angular.z = 0
+    else:
+        move.angular.z = 0.09
+
+    if lidar_front < front_distance_reaction:
+        move.angular.z = 0.20
+
+
+def p_controller():
+    move.linear.x = 0.05
+
+    error = perfect_wall_distance - lidar_right
+    koeff_p = 1.0
+    move.angular.z = koeff_p * error
+
+    if lidar_front < front_distance_reaction:
+        move.angular.z = 0.20
+
+
 
 
 def scan_callback(msg):
-    global right, front
-    right = msg.ranges[270]
-    front = msg.ranges[360]
+    global lidar_right, lidar_front
+    lidar_right = msg.ranges[270]
+    lidar_front = msg.ranges[360]
     #rospy.loginfo("[scan_callback] Front: " + str(front) + ", Right: " + str(right))
 
 
 def feedback_callback(feedback):
     distance = feedback.current_total
-    print("[feedback_callback] Distance: " + str(distance))
+    rospy.loginfo("Distance: " + str(distance))
 
 
 rospy.init_node("wall_walking_node")
@@ -68,17 +98,10 @@ client.send_goal(goal, feedback_cb=feedback_callback)
 state_result = client.get_state()
 
 while state_result < DONE:
-    rospy.loginfo("[main] Move along the wall")
-    move.linear.x = 0.05
-    move.angular.z = 0
-    if right > 0.4:
-        move.angular.z = -0.09
-    elif right > 0.3:
-        move.angular.z = 0
-    else:
-        move.angular.z = 0.09
-    if front < 0.5:
-        move.angular.z = 0.20
+    # rospy.loginfo("[main] Move along the wall")
+
+    p_controller()
+
     pubCmdVel.publish(move)
     rate.sleep()
     state_result = client.get_state()

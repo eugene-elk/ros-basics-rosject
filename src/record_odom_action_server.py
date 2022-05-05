@@ -13,7 +13,7 @@ class RecordOdomAction():
 
     _feedback = OdomRecordFeedback()
     _result = OdomRecordResult()
-    one_lap_dist = 5.5
+    one_lap_dist = 5.55
 
     def __init__(self):
         self.subOdom = rospy.Subscriber('/odom', Odometry, self.odom_callback)
@@ -46,7 +46,7 @@ class RecordOdomAction():
         odom_readings.z = []
 
         new_odom = Point()
-        result_odom = list()
+        result_odom = []
 
         while distance_travelled < self.one_lap_dist:
 
