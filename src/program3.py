@@ -22,6 +22,9 @@ lidar_front = float()
 front_distance_reaction = 0.55
 perfect_wall_distance = 0.32
 
+error = 0
+error_old = 0
+
 
 def rele_controller():
     move.linear.x = 0.05
@@ -39,15 +42,37 @@ def rele_controller():
 
 def p_controller():
     move.linear.x = 0.05
-
+    global error
     error = perfect_wall_distance - lidar_right
     koeff_p = 1.0
-    move.angular.z = koeff_p * error
+    turn_value = koeff_p * error
+    rospy.loginfo("P: " + str(turn_value))
+
+    move.angular.z = turn_value
 
     if lidar_front < front_distance_reaction:
         move.angular.z = 0.20
 
 
+def pd_controller():
+    move.linear.x = 0.05
+
+    global error, error_old
+    error = perfect_wall_distance - lidar_right
+
+    koeff_p = 1.0
+    koeff_d = 0.5
+    pid_p = (koeff_p * error)
+    pid_d = (koeff_d * (error - error_old))
+    turn_value = pid_p + pid_d
+    rospy.loginfo("P: " + str(pid_p) + ", D: " + str(pid_d))
+
+    move.angular.z = turn_value
+
+    if lidar_front < front_distance_reaction:
+        move.angular.z = 0.20
+
+    error_old = error
 
 
 def scan_callback(msg):
@@ -87,7 +112,7 @@ while pubCmdVel.get_num_connections() < 1:
     rospy.loginfo("[main] Waiting for connection to /cmd_vel")
     time.sleep(0.1)
 
-rate = rospy.Rate(1)
+rate = rospy.Rate(10)
 move = Twist()
 move.linear.x = 0
 move.angular.z = 0
@@ -100,12 +125,12 @@ state_result = client.get_state()
 while state_result < DONE:
     # rospy.loginfo("[main] Move along the wall")
 
-    p_controller()
+    pd_controller()
 
     pubCmdVel.publish(move)
     rate.sleep()
     state_result = client.get_state()
-    rospy.loginfo("[main] state_result: " + str(state_result))
+    # rospy.loginfo("[main] state_result: " + str(state_result))
 
 move.linear.x = 0
 move.angular.z = 0
