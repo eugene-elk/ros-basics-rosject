@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import os
 import time
 import rospy
 import actionlib
@@ -38,6 +39,8 @@ find_wall_service = rospy.ServiceProxy('/find_wall', FindWall)
 find_wall_request = FindWallRequest()
 find_wall_result = find_wall_service(find_wall_request)
 print(find_wall_result)
+
+os.system("rosnode kill find_wall_node")
 
 client = actionlib.SimpleActionClient('/record_odom', OdomRecordAction)
 rospy.loginfo('[main] Waiting for Action Server')
@@ -81,7 +84,6 @@ while state_result < DONE:
     state_result = client.get_state()
     rospy.loginfo("[main] state_result: " + str(state_result))
 
-
 move.linear.x = 0
 move.angular.z = 0
 pubCmdVel.publish(move)
@@ -91,3 +93,5 @@ if state_result == ERROR:
     rospy.logerr("[main] Something went wrong in the Server Side")
 if state_result == WARN:
     rospy.logwarn("[main] There is a warning in the Server Side")
+
+# os.system("rosnode kill record_odom_as")

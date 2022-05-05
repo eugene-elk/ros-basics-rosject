@@ -13,7 +13,7 @@ class RecordOdomAction():
 
     _feedback = OdomRecordFeedback()
     _result = OdomRecordResult()
-    one_lap_dist = 4.0
+    one_lap_dist = 5.5
 
     def __init__(self):
         self.subOdom = rospy.Subscriber('/odom', Odometry, self.odom_callback)
@@ -45,6 +45,9 @@ class RecordOdomAction():
         odom_readings.y = []
         odom_readings.z = []
 
+        new_odom = Point()
+        result_odom = list()
+
         while distance_travelled < self.one_lap_dist:
 
             if self._as.is_preempt_requested():
@@ -57,25 +60,28 @@ class RecordOdomAction():
             odom_readings.y.append(self.odom_y)
             odom_readings.z.append(self.odom_theta)
 
+            new_odom.x = self.odom_x
+            new_odom.y = self.odom_y
+            new_odom.z = self.odom_theta
+            result_odom.append(new_odom)
+
             if iteration > 0:
                 last_step = math.sqrt((math.pow(odom_readings.x[iteration] - odom_readings.x[iteration - 1], 2)) + (
                     math.pow(odom_readings.y[iteration] - odom_readings.y[iteration - 1], 2)))
 
             iteration += 1
             distance_travelled += last_step
-            rospy.loginfo('[odom_as] Travelled distance: ' +
-                          str(distance_travelled))
 
-            self._feedback.current_total = distance_travelled
+            self._feedback.current_total = round(distance_travelled, 2)
             self._as.publish_feedback(self._feedback)
             self.rate.sleep()
 
         if success:
-            self._result = odom_readings
+            self._result.list_of_odoms = result_odom
             self._as.set_succeeded(self._result)
 
 
 if __name__ == '__main__':
-    rospy.init_node('action_custom_msg_node')
+    rospy.init_node('record_odom_as')
     RecordOdomAction()
     rospy.spin()
