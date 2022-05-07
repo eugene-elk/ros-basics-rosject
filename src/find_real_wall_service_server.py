@@ -69,9 +69,13 @@ class FindWallService():
                         rospy.loginfo("new wall position: "+str(wall_position))
 
         if at_least_one_wall:
+            wall_position /= 2
             rospy.loginfo("----------------------")
             rospy.loginfo("wall_position: " + str(wall_position))
             rospy.loginfo("wall_distance: " + str(minimal_wall_distance))
+
+            self.rotate_to_wall(wall_position)
+
         else:
             rospy.loginfo("didn't find any straight walls")
 
@@ -79,6 +83,18 @@ class FindWallService():
         result.wallfound = at_least_one_wall
         rospy.loginfo("[srv] Service Server Finished")
         return result
+
+    def rotate_to_wall(self, wall_position):
+        destination = wall_position - 180
+
+        rospy.loginfo("destination: " + str(destination))
+        self.move.angular.z = 0.1 * math.copysign(1, destination)
+        self.pub.publish(self.move)
+
+        rospy.sleep(abs(destination) * 0.18)
+        self.move.angular.z = 0
+        self.pub.publish(self.move)
+        rospy.loginfo("finish rotation")
 
 
 if __name__ == '__main__':
