@@ -32,7 +32,7 @@ class FindWallService():
     def callback_scan(self, msg):
 
         self.lidar_values = msg.ranges
-        time.sleep(1)
+        # print(self.lidar_values[360])
 
     def callback_srv(self, request):
 
@@ -75,6 +75,7 @@ class FindWallService():
             rospy.loginfo("wall_distance: " + str(minimal_wall_distance))
 
             self.rotate_to_wall(wall_position)
+            self.move_to_wall()
 
         else:
             rospy.loginfo("didn't find any straight walls")
@@ -85,6 +86,7 @@ class FindWallService():
         return result
 
     def rotate_to_wall(self, wall_position):
+
         destination = wall_position - 180
 
         rospy.loginfo("destination: " + str(destination))
@@ -95,6 +97,27 @@ class FindWallService():
         self.move.angular.z = 0
         self.pub.publish(self.move)
         rospy.loginfo("finish rotation")
+
+    def move_to_wall(self):
+
+        rospy.loginfo("move forward")
+        self.move.linear.x = 0.05
+        self.move.angular.z = 0
+        self.pub.publish(self.move)
+
+        while self.lidar_values[360] > 0.35:
+            rospy.sleep(0.5)
+
+        rospy.loginfo("rotate")
+        self.move.linear.x = 0
+        self.move.angular.z = 0.1
+        self.pub.publish(self.move)
+        rospy.sleep(90 * 0.18)
+
+        rospy.loginfo("stop")
+        self.move.linear.x = 0
+        self.move.angular.z = 0
+        self.pub.publish(self.move)
 
 
 if __name__ == '__main__':
