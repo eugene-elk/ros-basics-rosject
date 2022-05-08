@@ -43,7 +43,7 @@ goal = OdomRecordGoal()
 client.send_goal(goal, feedback_cb=feedback_callback)
 
 state_result = client.get_state()
-while state_result < DONE:
+while (state_result < DONE) and (not rospy.is_shutdown()):
     wf_control.pd_controller()
     rate.sleep()
     state_result = client.get_state()

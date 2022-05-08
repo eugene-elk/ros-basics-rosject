@@ -42,7 +42,7 @@ class RecordOdomAction():
 
         result_odom = []
 
-        while distance_travelled < self.one_lap_dist:
+        while (distance_travelled < self.one_lap_dist) and (not rospy.is_shutdown()):
 
             if self._as.is_preempt_requested():
                 rospy.loginfo('[odom_as] The goal has been cancelled')

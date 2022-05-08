@@ -7,7 +7,7 @@ from geometry_msgs.msg import Twist
 class WallFollowControl():
 
     front_distance_reaction = 0.55
-    perfect_wall_distance = 0.32
+    perfect_wall_distance = 0.35
     koeff_p = 1.0
     koeff_d = 0.5
 

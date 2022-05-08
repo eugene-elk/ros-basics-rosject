@@ -16,6 +16,9 @@ class FindWallService():
 
     def __init__(self):
 
+        self.vz = 0
+        self.vx = 0
+
         self.subScan = rospy.Subscriber('/scan', LaserScan, self.callback_scan)
         while self.subScan.get_num_connections() < 1:
             rospy.loginfo("Waiting for subsccription to /scan")
@@ -32,6 +35,10 @@ class FindWallService():
     def callback_scan(self, msg):
 
         self.lidar_values = msg.ranges
+
+        self.move.linear.x = self.vx
+        self.move.angular.z = self.vz
+        self.pub.publish(self.move)
         # print(self.lidar_values[360])
 
     def callback_srv(self, request):
@@ -90,34 +97,41 @@ class FindWallService():
         destination = wall_position - 180
 
         rospy.loginfo("destination: " + str(destination))
-        self.move.angular.z = 0.1 * math.copysign(1, destination)
-        self.pub.publish(self.move)
+        self.vz = 0.2 * math.copysign(1, destination)
+        # self.pub.publish(self.move)
 
-        rospy.sleep(abs(destination) * 0.18)
-        self.move.angular.z = 0
-        self.pub.publish(self.move)
+        rospy.sleep(abs(destination) * 0.09)
+        self.vz = 0
+        # self.move.angular.z = 0
+        # self.pub.publish(self.move)
         rospy.loginfo("finish rotation")
 
     def move_to_wall(self):
 
         rospy.loginfo("move forward")
-        self.move.linear.x = 0.05
-        self.move.angular.z = 0
-        self.pub.publish(self.move)
+        self.vx = 0.05
+        self.vz = 0
+        #self.move.linear.x = 0.05
+        #self.move.angular.z = 0
+        # self.pub.publish(self.move)
 
         while self.lidar_values[360] > 0.35:
             rospy.sleep(0.5)
 
         rospy.loginfo("rotate")
-        self.move.linear.x = 0
-        self.move.angular.z = 0.1
-        self.pub.publish(self.move)
-        rospy.sleep(90 * 0.18)
+        self.vx = 0
+        self.vz = 0.2
+        #self.move.linear.x = 0
+        #self.move.angular.z = 0.2
+        # self.pub.publish(self.move)
+        rospy.sleep(90 * 0.09)
 
         rospy.loginfo("stop")
-        self.move.linear.x = 0
-        self.move.angular.z = 0
-        self.pub.publish(self.move)
+        self.vx = 0
+        self.vz = 0
+        #self.move.linear.x = 0
+        #self.move.angular.z = 0
+        # self.pub.publish(self.move)
 
 
 if __name__ == '__main__':

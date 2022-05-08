@@ -1,5 +1,5 @@
 <launch>
-    <node pkg="wallwalking" type="find_wall_service_server.py" name="find_wall_node" output="screen" />
+    <node pkg="wallwalking" type="find_real_wall_service_server.py" name="find_wall_node" output="screen" />
     <node pkg="wallwalking" type="record_odom_action_server.py" name="record_odom_node" output="screen" />
     <node pkg="wallwalking" type="program3.py" name="wall_walking_node" output="screen" />
 </launch>
